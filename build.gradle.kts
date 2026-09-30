@@ -5,13 +5,17 @@ allprojects {
         mavenLocal()
     }
 
+    val javaPluginExtension = extensions.getByType<JavaPluginExtension>()
+
+    javaPluginExtension.toolchain{
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
 
     /**
      * fat jart task for all subprojects
      * WARNING!!! path of main class must be same for all subprojects
      */
     val mainClass = "ru.otus.danilchenko.App"
-    val ext = extensions.getByType<JavaPluginExtension>()
     val runtimeClasspath = configurations["runtimeClasspath"]
     plugins.withType(JavaPlugin::class.java) {
         tasks.register<Jar>("fatJar") {
@@ -23,7 +27,7 @@ allprojects {
             archiveVersion = project.version.toString()
 
             dependsOn(runtimeClasspath)
-            from(ext.sourceSets["main"].output)
+            from(javaPluginExtension.sourceSets["main"].output)
             from({
                 runtimeClasspath.filter { it.name.endsWith("jar") }.map { zipTree(it) }
             })
