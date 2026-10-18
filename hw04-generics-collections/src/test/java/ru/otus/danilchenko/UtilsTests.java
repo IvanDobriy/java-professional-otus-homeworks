@@ -11,12 +11,12 @@ public class UtilsTests {
     @Test
     void unicCheck() {
         final String[] words = {
-                "1", "2", "3", "4", "5",
+                "1", "2", "3", "4", "5", "6",
                 "1", "2", "3", "4", "5",
                 "1", "2", "3", "4", "5",
                 "1", "2", "3", "4", "5",
         };
-        final var expected = List.of("1", "2", "3", "4", "5");
+        final var expected = List.of("1", "2", "3", "4", "5", "6");
         final var result = Utils.unic(words);
         Assertions.assertEquals(expected, result);
     }
