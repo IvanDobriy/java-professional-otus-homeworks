@@ -1,40 +1,22 @@
 package ru.otus.danilchenko.test;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 public class TestRunner {
-    private Logger logger = Logger.getLogger(this.getClass().getName());
-
-    private interface Callback {
-        void run() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException;
-    }
-
-    private void withErrorHandling(Callback callback) {
-        Objects.requireNonNull(callback);
-        try {
-            callback.run();
-        } catch (Exception e) {
-            logger.severe(String.format("Msg: %s, stackTrace: %s", e.getMessage(), Arrays.asList(e.getStackTrace())));
-        }
-    }
-
 
     private static boolean ensureAccessable(Method method, Object object) {
         return method.canAccess(object) || method.trySetAccessible();
     }
 
-
-    public void run(String className) {
+    public static void run(String className) {
         Objects.requireNonNull(className);
-        withErrorHandling(() -> {
-            ClassLoader classLoader = this.getClass().getClassLoader();
+        Report report = new Report();
+        report.start((someCallback) -> {
+            ClassLoader classLoader = TestRunner.class.getClassLoader();
             Class<?> clazz = classLoader.loadClass(className);
 
             final List<Method> testMethods = new ArrayList<>();
@@ -53,31 +35,30 @@ public class TestRunner {
                 }
             }
             for (Method testMethod : testMethods) {
-                try {
+                someCallback.runTest(testMethod, () -> {
                     Constructor<?> constructor = clazz.getDeclaredConstructor();
                     Object testObject = constructor.newInstance();
                     for (Method beforeMethod : beforeMethods) {
                         if (ensureAccessable(beforeMethod, testObject)) {
                             beforeMethod.invoke(testObject);
+                        } else {
+                            throw new RuntimeException(String.format("Can`t invoke method: %s", beforeMethod.getName()));
                         }
                     }
-
                     if (ensureAccessable(testMethod, testObject)) {
                         testMethod.invoke(testObject);
                     } else {
-                        //todo handle can`t invoke logic
+                        throw new RuntimeException(String.format("Can`t invoke test method: %s", testMethod.getName()));
                     }
-
                     for (Method afterMethod : afterMethods) {
                         if (ensureAccessable(afterMethod, testObject)) {
                             afterMethod.invoke(testObject);
+                        } else {
+                            throw new RuntimeException(String.format("Can`t invoke  method: %s", afterMethod.getName()));
                         }
                     }
-                } catch (Exception e) {
-                    logger.severe(e.getCause().getMessage());
-                }
+                });
             }
         });
-
     }
 }

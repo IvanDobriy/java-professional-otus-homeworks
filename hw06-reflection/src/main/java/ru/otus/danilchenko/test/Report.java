@@ -1,0 +1,95 @@
+package ru.otus.danilchenko.test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Report {
+    private static class TestMethodReport {
+        LocalDateTime time;
+        long period;
+        boolean successfully;
+        String msg;
+
+        @Override
+        public String toString() {
+            return "TestMethodReport{" +
+                    "time=" + time +
+                    ", period=" + period +
+                    ", successfully=" + successfully +
+                    ", msg='" + msg + '\'' +
+                    '}';
+        }
+    }
+
+    private Map<Method, TestMethodReport> reportData;
+    private LocalDateTime time;
+    private long period;
+    private boolean successfully;
+
+    public Report() {
+        reportData = new HashMap<>();
+        time = LocalDateTime.now();
+        period = 0;
+        successfully = true;
+    }
+
+    public interface SomeCallback {
+        void runTest(Method method, TestCallback testCallback);
+    }
+
+    public interface TestCallback {
+        void run() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException;
+    }
+
+    public interface Callback {
+        void run(SomeCallback someCallback) throws ClassNotFoundException;
+    }
+
+    private class SC implements SomeCallback {
+        @Override
+        public void runTest(Method method, TestCallback testCallback) {
+            TestMethodReport tmr = new TestMethodReport();
+            tmr.time = LocalDateTime.now();
+            tmr.msg = "Ok";
+            tmr.successfully = true;
+            long testStartTime = System.currentTimeMillis();
+            reportData.put(method, tmr);
+            try {
+                testCallback.run();
+            } catch (Exception e) {
+                successfully = false;
+                tmr.successfully = false;
+                tmr.msg = e.getMessage() + Arrays.asList(e.getStackTrace());
+            } finally {
+                tmr.period = System.currentTimeMillis() - testStartTime;
+            }
+        }
+    }
+
+    void start(Callback callback) {
+        time = LocalDateTime.now();
+        final long startTimeMills = System.currentTimeMillis();
+        try {
+            callback.run(new SC());
+        } catch (Exception e) {
+            successfully = false;
+        } finally {
+            period = System.currentTimeMillis() - startTimeMills;
+            System.out.println(this);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Report{" +
+                "reportData=" + reportData +
+                ", time=" + time +
+                ", period=" + period +
+                ", successfully=" + successfully +
+                '}';
+    }
+}
