@@ -1,6 +1,7 @@
 package ru.otus.danilchenko.test;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,9 +9,14 @@ import java.util.Objects;
 
 public class TestRunner {
 
-    private static boolean ensureAccessable(Method method, Object object) {
-        return method.canAccess(object) || method.trySetAccessible();
+    private static void tryInvoke(Method method, Object object) throws InvocationTargetException, IllegalAccessException {
+        if (method.canAccess(object) || method.trySetAccessible()) {
+            method.invoke(object);
+        } else {
+            throw new RuntimeException(String.format("Can`t invoke annotated method: %s", method.getName()));
+        }
     }
+
 
     public static void run(String className) {
         Objects.requireNonNull(className);
@@ -39,23 +45,11 @@ public class TestRunner {
                     Constructor<?> constructor = clazz.getDeclaredConstructor();
                     Object testObject = constructor.newInstance();
                     for (Method beforeMethod : beforeMethods) {
-                        if (ensureAccessable(beforeMethod, testObject)) {
-                            beforeMethod.invoke(testObject);
-                        } else {
-                            throw new RuntimeException(String.format("Can`t invoke method: %s", beforeMethod.getName()));
-                        }
+                        tryInvoke(beforeMethod, testObject);
                     }
-                    if (ensureAccessable(testMethod, testObject)) {
-                        testMethod.invoke(testObject);
-                    } else {
-                        throw new RuntimeException(String.format("Can`t invoke test method: %s", testMethod.getName()));
-                    }
+                    tryInvoke(testMethod, testObject);
                     for (Method afterMethod : afterMethods) {
-                        if (ensureAccessable(afterMethod, testObject)) {
-                            afterMethod.invoke(testObject);
-                        } else {
-                            throw new RuntimeException(String.format("Can`t invoke  method: %s", afterMethod.getName()));
-                        }
+                        tryInvoke(afterMethod, testObject);
                     }
                 });
             }
