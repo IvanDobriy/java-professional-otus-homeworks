@@ -20,8 +20,8 @@ public class TestRunner {
 
     public static void run(String className) {
         Objects.requireNonNull(className);
-        TestSuiteReport testSuiteReport = new TestSuiteReport();
-        testSuiteReport.start((someCallback) -> {
+        TestSuiteReport testSuiteReport = new TestSuiteReport(className);
+        testSuiteReport.start((testExecutor) -> {
             ClassLoader classLoader = TestRunner.class.getClassLoader();
             Class<?> clazz = classLoader.loadClass(className);
 
@@ -41,7 +41,7 @@ public class TestRunner {
                 }
             }
             for (Method testMethod : testMethods) {
-                someCallback.runTest(testMethod, () -> {
+                testExecutor.runTest(testMethod, () -> {
                     Constructor<?> constructor = clazz.getDeclaredConstructor();
                     Object testObject = constructor.newInstance();
                     for (Method beforeMethod : beforeMethods) {
@@ -54,5 +54,6 @@ public class TestRunner {
                 });
             }
         });
+        System.out.println(testSuiteReport.prepareReport());
     }
 }

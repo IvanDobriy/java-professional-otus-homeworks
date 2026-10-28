@@ -45,6 +45,6 @@ public class SomeTest {
     @Test
     private void test3() {
         System.out.println("test3");
-        throw new RuntimeException("bla bla bla");
+//        throw new RuntimeException("bla bla bla");
     }
 }

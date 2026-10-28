@@ -24,13 +24,14 @@ public class TestSuiteReport {
                     '}';
         }
     }
-
+    private String testSuiteName;
     private Map<Method, TestMethodReport> reportData;
     private LocalDateTime time;
     private long period;
     private boolean successfully;
 
-    public TestSuiteReport() {
+    public TestSuiteReport(String testSuiteName) {
+        this.testSuiteName = testSuiteName;
         reportData = new HashMap<>();
         time = LocalDateTime.now();
         period = 0;
@@ -81,6 +82,26 @@ public class TestSuiteReport {
             period = System.currentTimeMillis() - startTimeMills;
             System.out.println(this);
         }
+    }
+
+    String prepareReport() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(String.format("\n\nTest report: %s\n", testSuiteName))
+                .append(String.format("time: %s\n", time))
+                .append(String.format("duration[ms]: %d\n", period))
+                .append(String.format("successfully: %b\n", successfully));
+        if(reportData.isEmpty()){
+            return builder.toString();
+        }
+        builder.append("\nTest cases:\n");
+        reportData.forEach((method, report)->{
+            builder.append(String.format("\ntest name: %s\n", method.getName()))
+                    .append(String.format("time: %s\n", report.time))
+                    .append(String.format("duration[ms]: %d\n", report.period))
+                    .append(String.format("successfully: %b\n", report.successfully))
+                    .append(String.format("msg: %s\n", report.msg ));
+        });
+        return builder.toString();
     }
 
     @Override
