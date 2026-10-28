@@ -13,16 +13,6 @@ public class TestSuiteReport {
         long period;
         boolean successfully;
         String msg;
-
-        @Override
-        public String toString() {
-            return "TestMethodReport{" +
-                    "time=" + time +
-                    ", period=" + period +
-                    ", successfully=" + successfully +
-                    ", msg='" + msg + '\'' +
-                    '}';
-        }
     }
     private String testSuiteName;
     private Map<Method, TestMethodReport> reportData;
@@ -101,15 +91,5 @@ public class TestSuiteReport {
                     .append(String.format("msg: %s\n", report.msg ));
         });
         return builder.toString();
-    }
-
-    @Override
-    public String toString() {
-        return "Report{" +
-                "reportData=" + reportData +
-                ", time=" + time +
-                ", period=" + period +
-                ", successfully=" + successfully +
-                '}';
     }
 }
