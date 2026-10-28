@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Report {
+public class TestSuiteReport {
     private static class TestMethodReport {
         LocalDateTime time;
         long period;
@@ -30,28 +30,28 @@ public class Report {
     private long period;
     private boolean successfully;
 
-    public Report() {
+    public TestSuiteReport() {
         reportData = new HashMap<>();
         time = LocalDateTime.now();
         period = 0;
         successfully = true;
     }
 
-    public interface SomeCallback {
-        void runTest(Method method, TestCallback testCallback);
+    public interface TestExecutor {
+        void runTest(Method method, TestBody testBody);
     }
 
-    public interface TestCallback {
+    public interface TestBody {
         void run() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException;
     }
 
-    public interface Callback {
-        void run(SomeCallback someCallback) throws ClassNotFoundException;
+    public interface TestSuite {
+        void run(TestExecutor testExecutor) throws ClassNotFoundException;
     }
 
-    private class SC implements SomeCallback {
+    private class SomeTestExecutor implements TestExecutor {
         @Override
-        public void runTest(Method method, TestCallback testCallback) {
+        public void runTest(Method method, TestBody testBody) {
             TestMethodReport tmr = new TestMethodReport();
             tmr.time = LocalDateTime.now();
             tmr.msg = "Ok";
@@ -59,7 +59,7 @@ public class Report {
             long testStartTime = System.currentTimeMillis();
             reportData.put(method, tmr);
             try {
-                testCallback.run();
+                testBody.run();
             } catch (Exception e) {
                 successfully = false;
                 tmr.successfully = false;
@@ -70,11 +70,11 @@ public class Report {
         }
     }
 
-    void start(Callback callback) {
+    void start(TestSuite testSuite) {
         time = LocalDateTime.now();
         final long startTimeMills = System.currentTimeMillis();
         try {
-            callback.run(new SC());
+            testSuite.run(new SomeTestExecutor());
         } catch (Exception e) {
             successfully = false;
         } finally {

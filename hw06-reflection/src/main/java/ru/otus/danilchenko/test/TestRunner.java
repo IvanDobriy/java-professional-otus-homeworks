@@ -20,8 +20,8 @@ public class TestRunner {
 
     public static void run(String className) {
         Objects.requireNonNull(className);
-        Report report = new Report();
-        report.start((someCallback) -> {
+        TestSuiteReport testSuiteReport = new TestSuiteReport();
+        testSuiteReport.start((someCallback) -> {
             ClassLoader classLoader = TestRunner.class.getClassLoader();
             Class<?> clazz = classLoader.loadClass(className);
 
