@@ -80,7 +80,6 @@ public class TestSuiteReport {
             successfully = false;
         } finally {
             period = System.currentTimeMillis() - startTimeMills;
-            System.out.println(this);
         }
     }
 
