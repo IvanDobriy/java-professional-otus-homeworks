@@ -1,0 +1,23 @@
+1. -Xms256m -Xmx256m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=./logs/heapdump.hprof -XX:+UseG1GC -Xlog:gc=debug:file=./logs/gc-%p-%t.log:tags,uptime,time,level:filecount=5,filesize=10m
+без модификаций кода
+spend msec:116779, sec:116 spend msec:116249, sec:116 spend msec:115004, sec:115 == 115.666
+
+2. -Xms2048m -Xmx2048m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=./logs/heapdump.hprof -XX:+UseG1GC -Xlog:gc=debug:file=./logs/gc-%p-%t.log:tags,uptime,time,level:filecount=5,filesize=10m
+увеличили размер хипа: 2048
+spend msec:112224, sec:112 spend msec:111447, sec:111 spend msec:111480, sec:111 == 111.333
+
+3. поиск оптимального хипа для роизводитлеьности
+- 256   spend msec:116779, sec:116 spend msec:116249, sec:116 spend msec:115004, sec:115 == 115.666
+- 384   spend msec:115092, sec:115 spend msec:110906, sec:110 spend msec:114976, sec:114 == 113
+- 512   spend msec:114546, sec:114 spend msec:111045, sec:111 spend msec:110575, sec:110  == 111.666
+- 1024  spend msec:115558, sec:115 spend msec:113403, sec:113 spend msec:115726, sec:115  == 114.333
+- 1280  spend msec:112697, sec:112 spend msec:111695, sec:111 spend msec:112850, sec:112 ==  111.666
+- 1536  spend msec:114567, sec:114 spend msec:111976, sec:111 spend msec:111913, sec:111  == 112
+- 2048  spend msec:112224, sec:112 spend msec:111447, sec:111 spend msec:111480, sec:111 == 111.333
+
+-- после оптимизации
+- 256 spend msec:75656, sec:75 spend msec:76605, sec:76 spend msec:76808, sec:76
+- 384 spend msec:76929, sec:76 spend msec:78988, sec:78 spend msec:76770, sec:76
+- 512 spend msec:76173, sec:76 spend msec:76599, sec:76 spend msec:76419, sec:76
+- 1024 spend msec:77039, sec:77 spend msec:78194, sec:78 spend msec:78002, sec:78
+- 2048 spend msec:74630, sec:74 spend msec:74654, sec:74 spend msec:74394, sec:74

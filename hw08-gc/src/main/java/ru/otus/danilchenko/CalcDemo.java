@@ -17,12 +17,13 @@ public class CalcDemo {
     private static final Logger log = LoggerFactory.getLogger(CalcDemo.class);
 
     public static void main(String[] args) {
-        long counter = 500_000_000;
-        var summator = new Summator();
-        long startTime = System.currentTimeMillis();
+        final int counter = 500_000_000;
+        final Summator summator = new Summator();
+        final long startTime = System.currentTimeMillis();
 
-        for (var idx = 0; idx < counter; idx++) {
-            var data = new Data(idx);
+        Data data;
+        for (int idx = 0; idx < counter; idx++) {
+            data = new Data(idx);
             summator.calc(data);
 
             if (idx % 10_000_000 == 0) {
@@ -30,7 +31,7 @@ public class CalcDemo {
             }
         }
 
-        long delta = System.currentTimeMillis() - startTime;
+        final long delta = System.currentTimeMillis() - startTime;
         log.info("PrevValue:{}", summator.getPrevValue());
         log.info("PrevPrevValue:{}", summator.getPrevPrevValue());
         log.info("SumLastThreeValues:{}", summator.getSumLastThreeValues());
