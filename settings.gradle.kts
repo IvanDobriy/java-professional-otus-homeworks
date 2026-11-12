@@ -9,3 +9,4 @@ rootProject.name = "java-otus-professional-homeworks"
 include("hw01-gradle")
 include("hw04-generics-collections")
 include("hw06-reflection")
+include("hw08-gc")
