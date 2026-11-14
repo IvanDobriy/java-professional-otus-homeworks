@@ -16,15 +16,15 @@ public class AsmGenerator {
         }
     }
 
-    private static  <T> T createProxy(Class<?> proxyClazz, T instance){
+    private static <T> T createProxy(Class<?> proxyClazz, T instance) {
         try {
             return (T) proxyClazz.getConstructor(instance.getClass()).newInstance(instance);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void createConstructor(ClassWriter writer, String internalName, String interfaceName, String interfaceDescriptor){
+    private static void createConstructor(ClassWriter writer, String internalName, String interfaceName, String interfaceDescriptor) {
         // Объявляем класс: public, имя MathServiceProxy, родитель Object,
         // реализует интерфейс MathService.
         writer.visit(Opcodes.ASM9, Opcodes.ACC_PUBLIC, internalName, null,
@@ -51,19 +51,12 @@ public class AsmGenerator {
         ctor.visitMaxs(0, 0); // значения пересчитаются автоматически
         ctor.visitEnd();
     }
-    public static <T> Function<T, T> generateProxy(Class<T> clazz) {
-        final var internalName = Type.getInternalName(clazz);
-        byte[] bytes = readClassBytes(clazz);
 
+    public static <T> T generateProxy(T entity) {
+        byte[] bytes = readClassBytes(entity.getClass());
         final var reader = new ClassReader(bytes);
         final var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
-
-//        createConstructor(writer, internalName + "Proxy",Type.getInternalName(interfaceClass), Type.getDescriptor(interfaceClass));
-
         reader.accept(new LogClassVisitor(Opcodes.ASM9, writer), 0);
-
-        return (T obj) -> {
-            return  obj;
-        };
+        return entity;
     }
 }

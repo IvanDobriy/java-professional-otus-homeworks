@@ -10,12 +10,10 @@ public class App {
         calculator.calculation(1, 2);
         calculator.calculation(1, 2, "hi");
 
-
-        final var proxy = AsmGenerator.generateProxy(ICalculator.class).apply(calculator);
+        final var proxy = AsmGenerator.generateProxy(calculator);
         proxy.calculation(1);
         proxy.calculation(1, 2);
         proxy.calculation(1, 2, "hi");
-
     }
 
 }

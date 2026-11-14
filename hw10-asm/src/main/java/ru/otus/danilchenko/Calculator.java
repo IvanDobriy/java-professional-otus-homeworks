@@ -1,10 +1,13 @@
 package ru.otus.danilchenko;
 
+import ru.otus.danilchenko.asm.Log;
+
 import java.io.PrintStream;
 
 public class Calculator implements ICalculator {
     private final static PrintStream out = System.out;
 
+    @Log
     @Override
     public void calculation(int param1) {
         out.println(String.format("calculator, param: %s", param1));
