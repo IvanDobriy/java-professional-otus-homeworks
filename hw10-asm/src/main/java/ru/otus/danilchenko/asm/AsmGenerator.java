@@ -2,6 +2,8 @@ package ru.otus.danilchenko.asm;
 
 import org.objectweb.asm.*;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
@@ -18,18 +20,18 @@ public class AsmGenerator {
         }
     }
 
-    private static <T> T createProxy(Class<?> proxyClazz, T instance) {
+    private static <T> T createProxy(Class<?> proxyClazz, Class<?> interfaceClass, T instance) {
         try {
-            return (T) proxyClazz.getConstructor(instance.getClass()).newInstance(instance);
+            return (T) proxyClazz.getConstructor(interfaceClass).newInstance(instance);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void createConstructor(ClassWriter writer, String internalName, String interfaceName, String interfaceDescriptor) {
+    public static void createConstructor(ClassWriter writer, String internalName, String interfaceName, String interfaceDescriptor) {
         // Объявляем класс: public, имя MathServiceProxy, родитель Object,
         // реализует интерфейс MathService.
-        writer.visit(Opcodes.ASM9, Opcodes.ACC_PUBLIC, internalName, null,
+        writer.visit(Opcodes.V25, Opcodes.ACC_PUBLIC, internalName, null,
                 "java/lang/Object", new String[]{interfaceName});
 
         // Поле target — реальный сервис, которому делегируем вызовы.
@@ -54,15 +56,28 @@ public class AsmGenerator {
         ctor.visitEnd();
     }
 
-    public static <T> T generateProxy( T obj,  Class<T> interfaceClass) {
+    public static <T> T generateProxy( T obj,  Class<T> interfaceClass)  {
+        final String internalProxyName = Type.getInternalName(obj.getClass()) + "Proxy";
+        final String interfaceInternalName = Type.getInternalName(interfaceClass);
+        final String interfaceDescriptor = Type.getDescriptor(interfaceClass);
+
         byte[] bytes = readClassBytes(obj.getClass());
         final var reader = new ClassReader(bytes);
         final var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
-        createConstructor(writer, Type.getInternalName(obj.getClass()) + "Proxy",  Type.getInternalName(interfaceClass), Type.getDescriptor(interfaceClass));
-        reader.accept(new LogClassVisitor(Opcodes.ASM9, writer), 0);
+        createConstructor(writer, internalProxyName, interfaceInternalName, interfaceDescriptor);
+        reader.accept(new LogClassVisitor(Opcodes.ASM9, writer, internalProxyName, interfaceInternalName, interfaceDescriptor), 0);
         writer.visitEnd();
 
+        byte[] bytecode  = writer.toByteArray();
 
-        return obj;
+        try (FileOutputStream out = new FileOutputStream("CalculatorProxy.class")) {
+            out.write(bytecode);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
+        Class<?> proxyClass = new ByteArrayClassLoader(Thread.currentThread().getContextClassLoader())
+                .defineAndLoad(obj.getClass().getName() + "Proxy", bytecode);
+        return createProxy(proxyClass, interfaceClass, obj);
     }
 }

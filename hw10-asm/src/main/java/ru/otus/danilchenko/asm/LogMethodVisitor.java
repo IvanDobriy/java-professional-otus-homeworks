@@ -1,98 +1,129 @@
 package ru.otus.danilchenko.asm;
 
 import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 public class LogMethodVisitor extends MethodVisitor {
-    private boolean needHandle = false;
-    private static final String logDescriptorName = Type.getDescriptor(Log.class);
-    private final int access;
+    private final MethodVisitor mv;
+    private final String internalName;
+    private final String interfaceName;
+    private final String interfaceDescriptor;
     private final String name;
     private final String descriptor;
+    private boolean needHandle = false;
 
-    protected LogMethodVisitor(int api,  int access, String name, String descriptor, MethodVisitor methodVisitor) {
-        this.access = access;
+    public LogMethodVisitor(int api, MethodVisitor methodVisitor,
+                            String internalName, String interfaceName,
+                            String interfaceDescriptor, String name, String descriptor) {
+        super(api, null);
+        this.mv = methodVisitor;
+        this.internalName = internalName;
+        this.interfaceName = interfaceName;
+        this.interfaceDescriptor = interfaceDescriptor;
         this.name = name;
         this.descriptor = descriptor;
-
-        super(api, methodVisitor);
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-        if(descriptor.equals(logDescriptorName)){
-           needHandle = true;
+        if (descriptor.equals(Type.getDescriptor(Log.class))) {
+            needHandle = true;
         }
-        return super.visitAnnotation(descriptor, visible);
+        return mv.visitAnnotation(descriptor, visible);
     }
 
     @Override
     public void visitCode() {
-        if (!needHandle) {
-            super.visitCode();
-            return;
+        mv.visitCode();
+        if (needHandle) {
+            emitPrint();
         }
-        super.visitCode();   // сначала открыть тело метода
-        emitPrint();
+
+        // делегирование: target.method(args)
+        mv.visitVarInsn(Opcodes.ALOAD, 0);
+        mv.visitFieldInsn(Opcodes.GETFIELD, internalName, "target", interfaceDescriptor);
+
+        Type[] args = Type.getArgumentTypes(descriptor);
+        int slot = 1;
+        for (Type t : args) {
+            loadArg(mv, t, slot);
+            slot += t.getSize();
+        }
+        mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, interfaceName, name, descriptor, true);
+
+        Type returnType = Type.getMethodType(descriptor).getReturnType();
+        if (returnType.equals(Type.VOID_TYPE)) {
+            mv.visitInsn(Opcodes.RETURN);
+        } else if (returnType.equals(Type.INT_TYPE) || returnType.equals(Type.BOOLEAN_TYPE)
+                || returnType.equals(Type.BYTE_TYPE) || returnType.equals(Type.SHORT_TYPE)
+                || returnType.equals(Type.CHAR_TYPE)) {
+            mv.visitInsn(Opcodes.IRETURN);
+        } else if (returnType.equals(Type.LONG_TYPE)) {
+            mv.visitInsn(Opcodes.LRETURN);
+        } else if (returnType.equals(Type.FLOAT_TYPE)) {
+            mv.visitInsn(Opcodes.FRETURN);
+        } else if (returnType.equals(Type.DOUBLE_TYPE)) {
+            mv.visitInsn(Opcodes.DRETURN);
+        } else {
+            mv.visitInsn(Opcodes.ARETURN);
+        }
+        mv.visitMaxs(0, 0);
     }
 
     private void emitPrint() {
-        // System.out
-        super.visitFieldInsn(Opcodes.GETSTATIC,
+        mv.visitFieldInsn(Opcodes.GETSTATIC,
                 "java/lang/System", "out", "Ljava/io/PrintStream;");
 
-        // new StringBuilder
-        super.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
-        super.visitInsn(Opcodes.DUP);
-        super.visitMethodInsn(Opcodes.INVOKESPECIAL,
+        mv.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
+        mv.visitInsn(Opcodes.DUP);
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL,
                 "java/lang/StringBuilder", "<init>", "()V", false);
 
-        // "[asm] name("
-        super.visitLdcInsn("[asm] " + name + "(");
-        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+        mv.visitLdcInsn("[asm] " + name + "(");
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/lang/StringBuilder", "append",
                 "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 
-        // параметры
-        int slot = (access & Opcodes.ACC_STATIC) == 0 ? 1 : 0;
+        int slot = 1;
         Type[] args = Type.getArgumentTypes(descriptor);
         for (int i = 0; i < args.length; i++) {
             if (i > 0) {
-                super.visitLdcInsn(", ");
-                super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                mv.visitLdcInsn(", ");
+                mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                         "java/lang/StringBuilder", "append",
                         "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
             }
             switch (args[i].getSort()) {
                 case Type.INT, Type.BOOLEAN, Type.BYTE, Type.SHORT, Type.CHAR -> {
-                    super.visitVarInsn(Opcodes.ILOAD, slot);
-                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                    mv.visitVarInsn(Opcodes.ILOAD, slot);
+                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                             "java/lang/StringBuilder", "append",
                             "(I)Ljava/lang/StringBuilder;", false);
                 }
                 case Type.LONG -> {
-                    super.visitVarInsn(Opcodes.LLOAD, slot);
-                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                    mv.visitVarInsn(Opcodes.LLOAD, slot);
+                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                             "java/lang/StringBuilder", "append",
                             "(J)Ljava/lang/StringBuilder;", false);
                 }
                 case Type.FLOAT -> {
-                    super.visitVarInsn(Opcodes.FLOAD, slot);
-                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                    mv.visitVarInsn(Opcodes.FLOAD, slot);
+                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                             "java/lang/StringBuilder", "append",
                             "(F)Ljava/lang/StringBuilder;", false);
                 }
                 case Type.DOUBLE -> {
-                    super.visitVarInsn(Opcodes.DLOAD, slot);
-                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                    mv.visitVarInsn(Opcodes.DLOAD, slot);
+                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                             "java/lang/StringBuilder", "append",
                             "(D)Ljava/lang/StringBuilder;", false);
                 }
                 default -> {
-                    super.visitVarInsn(Opcodes.ALOAD, slot);
-                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                    mv.visitVarInsn(Opcodes.ALOAD, slot);
+                    mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                             "java/lang/StringBuilder", "append",
                             "(Ljava/lang/Object;)Ljava/lang/StringBuilder;", false);
                 }
@@ -100,17 +131,30 @@ public class LogMethodVisitor extends MethodVisitor {
             slot += args[i].getSize();
         }
 
-        // ")"
-        super.visitLdcInsn(")");
-        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+        mv.visitLdcInsn(")");
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/lang/StringBuilder", "append",
                 "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 
-        // toString + println
-        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/lang/StringBuilder", "toString",
                 "()Ljava/lang/String;", false);
-        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+    }
+
+    private void loadArg(MethodVisitor mv, Type type, int slot) {
+        if (type.equals(Type.INT_TYPE) || type.equals(Type.BOOLEAN_TYPE)
+                || type.equals(Type.BYTE_TYPE) || type.equals(Type.SHORT_TYPE) || type.equals(Type.CHAR_TYPE)) {
+            mv.visitVarInsn(Opcodes.ILOAD, slot);
+        } else if (type.equals(Type.LONG_TYPE)) {
+            mv.visitVarInsn(Opcodes.LLOAD, slot);
+        } else if (type.equals(Type.FLOAT_TYPE)) {
+            mv.visitVarInsn(Opcodes.FLOAD, slot);
+        } else if (type.equals(Type.DOUBLE_TYPE)) {
+            mv.visitVarInsn(Opcodes.DLOAD, slot);
+        } else {
+            mv.visitVarInsn(Opcodes.ALOAD, slot);
+        }
     }
 }
