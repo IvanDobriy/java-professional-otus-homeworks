@@ -2,12 +2,6 @@ package ru.otus.danilchenko.asm;
 
 import org.objectweb.asm.*;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.function.Function;
-
 public class AsmGenerator {
 
     private static byte[] readClassBytes(Class<?> clazz) {
@@ -28,7 +22,7 @@ public class AsmGenerator {
         }
     }
 
-    public static void createConstructor(ClassWriter writer, String internalName, String interfaceName, String interfaceDescriptor) {
+    private static void createConstructor(ClassWriter writer, String internalName, String interfaceName, String interfaceDescriptor) {
         // Объявляем класс: public, имя MathServiceProxy, родитель Object,
         // реализует интерфейс MathService.
         writer.visit(Opcodes.V25, Opcodes.ACC_PUBLIC, internalName, null,
@@ -56,7 +50,8 @@ public class AsmGenerator {
         ctor.visitEnd();
     }
 
-    public static <T> T generateProxy( T obj,  Class<T> interfaceClass)  {
+    public static <T> T generateProxy(T obj, Class<T> interfaceClass) {
+        final String proxyClassName = obj.getClass().getName() + "Proxy";
         final String internalProxyName = Type.getInternalName(obj.getClass()) + "Proxy";
         final String interfaceInternalName = Type.getInternalName(interfaceClass);
         final String interfaceDescriptor = Type.getDescriptor(interfaceClass);
@@ -68,16 +63,10 @@ public class AsmGenerator {
         reader.accept(new LogClassVisitor(Opcodes.ASM9, writer, internalProxyName, interfaceInternalName, interfaceDescriptor), 0);
         writer.visitEnd();
 
-        byte[] bytecode  = writer.toByteArray();
-
-        try (FileOutputStream out = new FileOutputStream("CalculatorProxy.class")) {
-            out.write(bytecode);
-        }catch (Exception e){
-            throw new RuntimeException(e);
-        }
+        byte[] bytecode = writer.toByteArray();
 
         Class<?> proxyClass = new ByteArrayClassLoader(Thread.currentThread().getContextClassLoader())
-                .defineAndLoad(obj.getClass().getName() + "Proxy", bytecode);
+                .defineAndLoad(proxyClassName, bytecode);
         return createProxy(proxyClass, interfaceClass, obj);
     }
 }
