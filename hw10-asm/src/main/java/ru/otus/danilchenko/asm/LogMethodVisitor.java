@@ -12,9 +12,6 @@ public class LogMethodVisitor extends MethodVisitor {
     private final String name;
     private final String descriptor;
 
-
-
-
     protected LogMethodVisitor(int api,  int access, String name, String descriptor, MethodVisitor methodVisitor) {
         this.access = access;
         this.name = name;
@@ -116,6 +113,4 @@ public class LogMethodVisitor extends MethodVisitor {
         super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
     }
-
-
 }

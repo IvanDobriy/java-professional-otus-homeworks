@@ -2,6 +2,8 @@ package ru.otus.danilchenko.asm;
 
 import org.objectweb.asm.*;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class AsmGenerator {
@@ -52,11 +54,15 @@ public class AsmGenerator {
         ctor.visitEnd();
     }
 
-    public static <T> T generateProxy(T entity) {
-        byte[] bytes = readClassBytes(entity.getClass());
+    public static <T> T generateProxy( T obj,  Class<T> interfaceClass) {
+        byte[] bytes = readClassBytes(obj.getClass());
         final var reader = new ClassReader(bytes);
         final var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+        createConstructor(writer, Type.getInternalName(obj.getClass()) + "Proxy",  Type.getInternalName(interfaceClass), Type.getDescriptor(interfaceClass));
         reader.accept(new LogClassVisitor(Opcodes.ASM9, writer), 0);
-        return entity;
+        writer.visitEnd();
+
+
+        return obj;
     }
 }
