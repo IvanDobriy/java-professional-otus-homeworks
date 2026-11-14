@@ -2,6 +2,8 @@ package ru.otus.danilchenko.asm;
 
 import org.objectweb.asm.*;
 
+import java.util.function.Function;
+
 public class AsmGenerator {
 
     private static byte[] readClassBytes(Class<?> clazz) {
@@ -49,27 +51,19 @@ public class AsmGenerator {
         ctor.visitMaxs(0, 0); // значения пересчитаются автоматически
         ctor.visitEnd();
     }
-
-    public static <T> T generateProxy(T initial, Class<?> interfaceClass) {
-        final var clazz = initial.getClass();
-        final var descriptor = Type.getDescriptor(clazz);
+    public static <T> Function<T, T> generateProxy(Class<T> clazz) {
         final var internalName = Type.getInternalName(clazz);
-        final var className = clazz.getName();
-        System.out.println(String.format("descriptor: %s, internalName: %s, className: %s", descriptor, internalName, className));
         byte[] bytes = readClassBytes(clazz);
 
         final var reader = new ClassReader(bytes);
         final var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
 
-        createConstructor(writer, internalName + "Proxy",Type.getInternalName(interfaceClass), Type.getDescriptor(interfaceClass));
-
-
-
+//        createConstructor(writer, internalName + "Proxy",Type.getInternalName(interfaceClass), Type.getDescriptor(interfaceClass));
 
         reader.accept(new LogClassVisitor(Opcodes.ASM9, writer), 0);
-        Class<?> proxyClass = new ByteArrayClassLoader(Thread.currentThread().getContextClassLoader())
-                .defineAndLoad(className + "Proxy", writer.toByteArray());
-        final var proxy = createProxy(proxyClass, initial);
-        return initial;
+
+        return (T obj) -> {
+            return  obj;
+        };
     }
 }

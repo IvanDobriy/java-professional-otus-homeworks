@@ -10,7 +10,10 @@ public class LogClassVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-//        System.out.println(String.format("access: %s, name: %s, descriptor: %s, signature %s, exceptions: %s", access, name, descriptor, signature, Arrays.asList(exceptions)));
+        if(name.startsWith("<")){
+            return null;
+        }
+        System.out.println(String.format("method name: %s", name));
         return super.visitMethod(access, name, descriptor, signature, exceptions);
     }
 }

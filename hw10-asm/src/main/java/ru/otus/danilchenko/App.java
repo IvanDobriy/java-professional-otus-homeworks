@@ -11,8 +11,7 @@ public class App {
         calculator.calculation(1, 2, "hi");
 
 
-        final ICalculator proxy = AsmGenerator.generateProxy(calculator, ICalculator.class);
-
+        final var proxy = AsmGenerator.generateProxy(ICalculator.class).apply(calculator);
         proxy.calculation(1);
         proxy.calculation(1, 2);
         proxy.calculation(1, 2, "hi");
