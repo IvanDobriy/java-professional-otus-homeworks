@@ -33,11 +33,12 @@ public class LogMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitCode() {
-        if(!needHandle){
+        if (!needHandle) {
+            super.visitCode();
             return;
         }
+        super.visitCode();   // сначала открыть тело метода
         emitPrint();
-        super.visitCode();
     }
 
     private void emitPrint() {
@@ -45,11 +46,13 @@ public class LogMethodVisitor extends MethodVisitor {
         super.visitFieldInsn(Opcodes.GETSTATIC,
                 "java/lang/System", "out", "Ljava/io/PrintStream;");
 
-        // new StringBuilder("[asm] name(")
+        // new StringBuilder
         super.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
         super.visitInsn(Opcodes.DUP);
         super.visitMethodInsn(Opcodes.INVOKESPECIAL,
                 "java/lang/StringBuilder", "<init>", "()V", false);
+
+        // "[asm] name("
         super.visitLdcInsn("[asm] " + name + "(");
         super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/lang/StringBuilder", "append",
@@ -66,7 +69,7 @@ public class LogMethodVisitor extends MethodVisitor {
                         "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
             }
             switch (args[i].getSort()) {
-                case Type.INT -> {
+                case Type.INT, Type.BOOLEAN, Type.BYTE, Type.SHORT, Type.CHAR -> {
                     super.visitVarInsn(Opcodes.ILOAD, slot);
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                             "java/lang/StringBuilder", "append",
@@ -78,6 +81,18 @@ public class LogMethodVisitor extends MethodVisitor {
                             "java/lang/StringBuilder", "append",
                             "(J)Ljava/lang/StringBuilder;", false);
                 }
+                case Type.FLOAT -> {
+                    super.visitVarInsn(Opcodes.FLOAD, slot);
+                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                            "java/lang/StringBuilder", "append",
+                            "(F)Ljava/lang/StringBuilder;", false);
+                }
+                case Type.DOUBLE -> {
+                    super.visitVarInsn(Opcodes.DLOAD, slot);
+                    super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+                            "java/lang/StringBuilder", "append",
+                            "(D)Ljava/lang/StringBuilder;", false);
+                }
                 default -> {
                     super.visitVarInsn(Opcodes.ALOAD, slot);
                     super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
@@ -88,28 +103,16 @@ public class LogMethodVisitor extends MethodVisitor {
             slot += args[i].getSize();
         }
 
-        // ") took " + (nanoTime() - startTimeLocal) + " ns"
-        super.visitLdcInsn(") took ");
+        // ")"
+        super.visitLdcInsn(")");
         super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/lang/StringBuilder", "append",
                 "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
 
-        super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                "java/lang/System", "nanoTime", "()J", false);
-        super.visitVarInsn(Opcodes.LLOAD, 1);
-        super.visitInsn(Opcodes.LSUB);
-
-        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                "java/lang/StringBuilder", "append",
-                "(J)Ljava/lang/StringBuilder;", false);
-        super.visitLdcInsn(" ns");
-        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                "java/lang/StringBuilder", "append",
-                "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        // toString + println
         super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/lang/StringBuilder", "toString",
                 "()Ljava/lang/String;", false);
-
         super.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
                 "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
     }
