@@ -1,5 +1,6 @@
 package ru.otus.danilchenko.atm;
 
+import ru.otus.danilchenko.atm.account.IAccount;
 import ru.otus.danilchenko.atm.banknote.IBanknote;
 import ru.otus.danilchenko.atm.banknote.INominal;
 import ru.otus.danilchenko.atm.cell.IGotCell;
@@ -12,9 +13,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class BanknoteReturning implements IBanknoteReturning {
     private final List<Map.Entry<INominal, IGotCell>> cells;
+    private final IAccount account;
 
-    public BanknoteReturning(Map<INominal, IGotCell> cells) {
+    public BanknoteReturning(Map<INominal, IGotCell> cells, IAccount account) {
         Objects.requireNonNull(cells);
+        Objects.requireNonNull(account);
+        this.account = account;
+
         this.cells = cells.entrySet()
                 .stream()
                 .sorted(
@@ -22,12 +27,16 @@ public class BanknoteReturning implements IBanknoteReturning {
                                 el2.getKey().getNominalValue() - el1.getKey().getNominalValue()
                 ).toList();
 
+
     }
 
     @Override
     public IBanknote[] returnBanknotes(int returnedSum) {
         List<IBanknote> banknotes = new ArrayList<>();
         final AtomicInteger rest = new AtomicInteger(returnedSum);
+        if(account.getAmountOfMoney() < returnedSum){
+            return new IBanknote[0];
+        }
         cells.forEach(el -> {
             INominal nominal = el.getKey();
             IGotCell cell = el.getValue();
@@ -37,10 +46,7 @@ public class BanknoteReturning implements IBanknoteReturning {
                 rest.set(rest.get() % nominal.getNominalValue());
             }
         });
-        if (rest.get() != 0) {
-            //todo возможны проблемы, если остаток будет, то мы удалим старые банкноты.
-            return new IBanknote[0];
-        }
+        account.removeAmountOfMoney(returnedSum - rest.get());
         return banknotes.toArray(IBanknote[]::new);
     }
 }
