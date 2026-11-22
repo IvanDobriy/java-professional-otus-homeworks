@@ -4,9 +4,20 @@ import ru.otus.danilchenko.atm.banknote.IBanknote;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Cell implements IPutCell, IGotCell {
-    final List<IBanknote> banknotes = new ArrayList<IBanknote>();
+    final List<IBanknote> banknotes;
+
+    public Cell() {
+        banknotes = new ArrayList<>();
+    }
+
+    public Cell(List<IBanknote> banknotes) {
+        Objects.requireNonNull(banknotes);
+        this.banknotes = banknotes;
+    }
+
 
     @Override
     public void putBanknote(IBanknote banknote) {
@@ -14,7 +25,7 @@ public class Cell implements IPutCell, IGotCell {
     }
 
     @Override
-    public IBanknote getBanknotes() {
+    public IBanknote getBanknote() {
         return banknotes.removeLast();
     }
 
