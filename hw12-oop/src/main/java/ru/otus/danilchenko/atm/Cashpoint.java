@@ -10,13 +10,13 @@ public class Cashpoint implements IBanknoteReceiving, IBanknoteReturning {
 
     public Cashpoint(IBanknoteReceiving banknoteReceiving, IBanknoteReturning banknoteReturning) {
         Objects.requireNonNull(banknoteReceiving);
+        Objects.requireNonNull(banknoteReturning);
         this.banknoteReceiving = banknoteReceiving;
         this.banknoteReturning = banknoteReturning;
     }
 
     @Override
     public void receiveBanknote(IBanknote banknote) {
-        Objects.requireNonNull(banknote);
         banknoteReceiving.receiveBanknote(banknote);
     }
 
