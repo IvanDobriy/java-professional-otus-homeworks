@@ -2,10 +2,11 @@ package ru.otus.danilchenko.atm;
 
 import ru.otus.danilchenko.atm.banknote.IBanknote;
 
-public class ChangeReturner implements IChangeReturning{
+public class BanknoteReturning implements IBanknoteReturning {
+
 
     @Override
-    public IBanknote[] returnChange() {
+    public IBanknote[] returnBanknotes(int returnedSum) {
         return new IBanknote[0];
     }
 }

@@ -4,23 +4,24 @@ import ru.otus.danilchenko.atm.banknote.IBanknote;
 
 import java.util.Objects;
 
-public class Cashpoint implements IBanknoteReceiving, IChangeReturning {
-    private IBanknoteReceiving banknoteReceiver;
-    private IChangeReturning changeReturner;
+public class Cashpoint implements IBanknoteReceiving, IBanknoteReturning {
+    private IBanknoteReceiving banknoteReceiving;
+    private IBanknoteReturning banknoteReturning;
 
-    public Cashpoint(IBanknoteReceiving banknoteReceiver, IChangeReturning changeReturner) {
-        Objects.requireNonNull(banknoteReceiver);
-        this.banknoteReceiver = banknoteReceiver;
-        this.changeReturner = changeReturner;
+    public Cashpoint(IBanknoteReceiving banknoteReceiving, IBanknoteReturning banknoteReturning) {
+        Objects.requireNonNull(banknoteReceiving);
+        this.banknoteReceiving = banknoteReceiving;
+        this.banknoteReturning = banknoteReturning;
     }
 
     @Override
-    public void receiveCache(IBanknote banknote) {
-        banknoteReceiver.receiveCache(banknote);
+    public void receiveBanknote(IBanknote banknote) {
+        Objects.requireNonNull(banknote);
+        banknoteReceiving.receiveBanknote(banknote);
     }
 
     @Override
-    public IBanknote[] returnChange() {
-        return changeReturner.returnChange();
+    public IBanknote[] returnBanknotes(int returnedSum) {
+        return banknoteReturning.returnBanknotes(returnedSum);
     }
 }
