@@ -4,23 +4,42 @@ import ru.otus.danilchenko.atm.banknote.IBanknote;
 import ru.otus.danilchenko.atm.banknote.INominal;
 import ru.otus.danilchenko.atm.cell.IGotCell;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BanknoteReturning implements IBanknoteReturning {
-    private final Map<INominal, IGotCell> cells;
+    private final List<Map.Entry<INominal, IGotCell>> cells;
 
     public BanknoteReturning(Map<INominal, IGotCell> cells) {
         Objects.requireNonNull(cells);
-        this.cells = cells;
+        this.cells = cells.entrySet()
+                .stream()
+                .sorted(
+                        (el1, el2) ->
+                                el1.getKey().getNominalValue() - el2.getKey().getNominalValue()
+                ).toList();
+
     }
 
     @Override
     public IBanknote[] returnBanknotes(int returnedSum) {
-//        //todo реализовать логику возрата как можно меньшего кол-ва банкнот из ячеек
-//        cells.forEach(banknoteType -> {
-//
-//        });
-        return new IBanknote[0];
+        List<IBanknote> banknotes = new ArrayList<>();
+        final AtomicInteger rest = new AtomicInteger(returnedSum);
+        cells.forEach(el -> {
+            INominal nominal = el.getKey();
+            IGotCell cell = el.getValue();
+            int num = rest.get() / nominal.getNominalValue();
+            if (num > 0 && cell.getSize() > 0) {
+                banknotes.add(cell.getBanknote());
+                rest.set(rest.get() % nominal.getNominalValue());
+            }
+        });
+        if (rest.get() != 0) {
+            return new IBanknote[0];
+        }
+        return banknotes.toArray(IBanknote[]::new);
     }
 }
