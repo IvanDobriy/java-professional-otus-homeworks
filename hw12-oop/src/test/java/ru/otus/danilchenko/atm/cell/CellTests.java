@@ -3,9 +3,7 @@ package ru.otus.danilchenko.atm.cell;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import ru.otus.danilchenko.atm.banknote.BanknoteNominal10;
-import ru.otus.danilchenko.atm.banknote.BanknoteNominal100;
-import ru.otus.danilchenko.atm.banknote.IBanknote;
+import ru.otus.danilchenko.atm.banknote.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +15,9 @@ public class CellTests {
     void positive_test() {
         final List<IBanknote> banknotes = new ArrayList<>();
         final var cell = new Cell(banknotes);
-        final var banknote1 = new BanknoteNominal10();
-        final var banknote2 = new BanknoteNominal100();
+        final var banknote1 = new Banknote(new Nominal(10));
+        final var banknote2 = new Banknote(new Nominal(100));
+
         cell.putBanknote(banknote1);
         cell.putBanknote(banknote2);
         Assertions.assertTrue(banknotes.contains(banknote1));
@@ -31,7 +30,7 @@ public class CellTests {
         Assertions.assertEquals(1, cell.getSize());
         Assertions.assertEquals(1, banknotes.size());
 
-        cellBanknote  = cell.getBanknote();
+        cellBanknote = cell.getBanknote();
         Assertions.assertEquals(banknote1, cellBanknote);
         Assertions.assertEquals(0, cell.getSize());
         Assertions.assertEquals(0, banknotes.size());
