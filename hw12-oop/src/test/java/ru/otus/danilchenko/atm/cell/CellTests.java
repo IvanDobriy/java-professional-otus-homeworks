@@ -1,4 +1,4 @@
-package ru.otus.danilchenko.cell;
+package ru.otus.danilchenko.atm.cell;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.TestInstance;
 import ru.otus.danilchenko.atm.banknote.BanknoteNominal10;
 import ru.otus.danilchenko.atm.banknote.BanknoteNominal100;
 import ru.otus.danilchenko.atm.banknote.IBanknote;
-import ru.otus.danilchenko.atm.cell.Cell;
 
 import java.util.ArrayList;
 import java.util.List;
