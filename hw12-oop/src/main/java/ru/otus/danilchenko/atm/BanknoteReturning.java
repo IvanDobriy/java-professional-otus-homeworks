@@ -19,7 +19,7 @@ public class BanknoteReturning implements IBanknoteReturning {
                 .stream()
                 .sorted(
                         (el1, el2) ->
-                                el1.getKey().getNominalValue() - el2.getKey().getNominalValue()
+                                el2.getKey().getNominalValue() - el1.getKey().getNominalValue()
                 ).toList();
 
     }
@@ -38,6 +38,7 @@ public class BanknoteReturning implements IBanknoteReturning {
             }
         });
         if (rest.get() != 0) {
+            //todo возможны проблемы, если остаток будет, то мы удалим старые банкноты.
             return new IBanknote[0];
         }
         return banknotes.toArray(IBanknote[]::new);

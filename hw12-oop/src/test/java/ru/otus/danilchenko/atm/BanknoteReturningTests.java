@@ -1,11 +1,14 @@
 package ru.otus.danilchenko.atm;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.danilchenko.atm.banknote.Banknote;
+import ru.otus.danilchenko.atm.banknote.IBanknote;
 import ru.otus.danilchenko.atm.banknote.Nominal;
 import ru.otus.danilchenko.atm.cell.Cell;
 
@@ -27,7 +30,13 @@ public class BanknoteReturningTests {
         final var banknoteReturning = new BanknoteReturning(
                 Map.of(banknote1.getNominal(), cell10, banknote2.getNominal(), cell100)
         );
-        banknoteReturning.returnBanknotes(10);
+        Mockito.when(cell10.getBanknote()).thenReturn(banknote1);
+        Mockito.when(cell10.getSize()).thenReturn(1, 0);
+        Mockito.when(cell100.getBanknote()).thenReturn(banknote2);
+        Mockito.when(cell100.getSize()).thenReturn(1, 0);
+        final var result  = banknoteReturning.returnBanknotes(110);
+        Assertions.assertEquals(2, result.length);
+        Assertions.assertArrayEquals(new IBanknote[]{banknote2, banknote1}, result);
     }
 
 }
