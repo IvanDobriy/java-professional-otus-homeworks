@@ -1,4 +1,4 @@
 package ru.otus.danilchenko.atm.account;
 
-public class CurrentAccount {
+public class CurrentAccount implements IAccount {
 }
