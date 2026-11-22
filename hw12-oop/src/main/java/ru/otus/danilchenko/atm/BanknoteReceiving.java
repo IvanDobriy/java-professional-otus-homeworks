@@ -3,14 +3,14 @@ package ru.otus.danilchenko.atm;
 import ru.otus.danilchenko.atm.banknote.IBanknote;
 import ru.otus.danilchenko.atm.cell.IPutCell;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class BanknoteReceiving implements IBanknoteReceiving {
 
-    private final HashMap<Class<? extends IBanknote>, IPutCell> cells;
+    private final Map<Class<? extends IBanknote>, IPutCell> cells;
 
-    public BanknoteReceiving(HashMap<Class<? extends IBanknote>, IPutCell> cells) {
+    public BanknoteReceiving(Map<Class<? extends IBanknote>, IPutCell> cells) {
         Objects.requireNonNull(cells);
         this.cells = cells;
     }
