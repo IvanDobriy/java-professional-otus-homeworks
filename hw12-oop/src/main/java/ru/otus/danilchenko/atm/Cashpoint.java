@@ -15,7 +15,7 @@ public class Cashpoint implements IBanknoteReceiving, IBanknoteReturning, ILogin
         Objects.requireNonNull(banknoteReceiving);
         Objects.requireNonNull(banknoteReturning);
         Objects.requireNonNull(accountStorage);
-        
+
         this.banknoteReceiving = banknoteReceiving;
         this.banknoteReturning = banknoteReturning;
         this.accountStorage = accountStorage;
@@ -37,7 +37,7 @@ public class Cashpoint implements IBanknoteReceiving, IBanknoteReturning, ILogin
         }
         final var banknotes = banknoteReturning.returnBanknotes(returnedSum);
         for(var banknote: banknotes){
-            account.removeAmountOfMoney(banknote.getNominal().getNominalValue());
+            account.removeAmountOfMoney(BanknoteUtils.getNominalValue(banknote.getNominal()));
         }
         return banknotes;
     }
