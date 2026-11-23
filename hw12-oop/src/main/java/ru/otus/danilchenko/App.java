@@ -4,6 +4,7 @@ import ru.otus.danilchenko.atm.AccountStorage;
 import ru.otus.danilchenko.atm.BanknoteReceiving;
 import ru.otus.danilchenko.atm.BanknoteReturning;
 import ru.otus.danilchenko.atm.Cashpoint;
+import ru.otus.danilchenko.atm.account.CurrentAccount;
 import ru.otus.danilchenko.atm.banknote.Banknote;
 import ru.otus.danilchenko.atm.banknote.IBanknote;
 import ru.otus.danilchenko.atm.banknote.INominal;
@@ -47,14 +48,34 @@ public class App {
         banknoteReturningCells.put(nominal100, cell100);
 
 
-        final var accountStorage = new AccountStorage();
+        final var userAccount = new CurrentAccount(1, 1000);
+
+
+        final var accountStorage = new AccountStorage(Map.of(userAccount.getId(), userAccount));
         final var banknoteReceiving = new BanknoteReceiving(banknoteReceivingCells);
         final var banknoteReturning = new BanknoteReturning(banknoteReturningCells);
         final var cashpoint = new Cashpoint(banknoteReceiving, banknoteReturning, accountStorage);
         cashpoint.login(1);
-
+        System.out.println(String.format("account, before receive banknote10: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteReturningCells);
+        cashpoint.receiveBanknote(banknote10);
+        System.out.println(String.format("account, after receive banknote10: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteReturningCells);
+        cashpoint.receiveBanknote(banknote50);
+        System.out.println(String.format("account, after receive banknote50: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteReturningCells);
+        cashpoint.receiveBanknote(banknote100);
+        System.out.println(String.format("account, after receive banknote100: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteReturningCells);
     }
 
+    private static void printCellContent( Map<INominal, IGotCell> cells) {
+        System.out.println("--------------------------------------------");
+        cells.forEach( (nominal, cell) -> {
+            System.out.println(String.format("cell nominal: %s, cell size: %s", nominal.getNominalValue(), cell.getSize()));
+        });
+        System.out.println("--------------------------------------------");
+    }
 
 
     private static void fillCell(Cell cell, IBanknote banknote, int number) {
