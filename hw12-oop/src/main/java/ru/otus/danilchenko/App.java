@@ -1,0 +1,87 @@
+package ru.otus.danilchenko;
+
+import ru.otus.danilchenko.atm.AccountStorage;
+import ru.otus.danilchenko.atm.BanknoteReceiving;
+import ru.otus.danilchenko.atm.BanknoteReturning;
+import ru.otus.danilchenko.atm.Cashpoint;
+import ru.otus.danilchenko.atm.account.CurrentAccount;
+import ru.otus.danilchenko.atm.banknote.Banknote;
+import ru.otus.danilchenko.atm.banknote.IBanknote;
+import ru.otus.danilchenko.atm.banknote.INominal;
+import ru.otus.danilchenko.atm.banknote.Nominal;
+import ru.otus.danilchenko.atm.cell.Cell;
+import ru.otus.danilchenko.atm.cell.IGotCell;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+public class App {
+    private static final INominal nominal10 = new Nominal(10);
+    private static final INominal nominal50 = new Nominal(50);
+    private static final INominal nominal100 = new Nominal(100);
+
+    private static final IBanknote banknote10 = new Banknote(nominal10);
+    private static final IBanknote banknote50 = new Banknote(nominal50);
+    private static final IBanknote banknote100 = new Banknote(nominal100);
+
+    private static final Cell cell10 = new Cell(new ArrayList<>());
+    private static final Cell cell50 = new Cell(new ArrayList<>());
+    private static final Cell cell100 = new Cell(new ArrayList<>());
+
+    public static void main(String[] args) {
+
+        fillCell(cell10, banknote10, 10);
+        fillCell(cell50, banknote50, 20);
+        fillCell(cell100, banknote100, 30);
+
+        final var banknoteCells = new HashMap<INominal, Cell>();
+        banknoteCells.put(nominal10, cell10);
+        banknoteCells.put(nominal50, cell50);
+        banknoteCells.put(nominal100, cell100);
+
+
+        final var userAccount = new CurrentAccount(1, 1000);
+
+
+        final var accountStorage = new AccountStorage(Map.of(userAccount.getId(), userAccount));
+        final var banknoteReceiving = new BanknoteReceiving(banknoteCells);
+        final var banknoteReturning = new BanknoteReturning(banknoteCells);
+        final var cashpoint = new Cashpoint(banknoteReceiving, banknoteReturning, accountStorage);
+        cashpoint.login(1);
+
+        System.out.println(String.format("account, before receive banknote10: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteCells);
+
+        cashpoint.receiveBanknote(banknote10);
+        System.out.println(String.format("account, after receive banknote10: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteCells);
+
+        cashpoint.receiveBanknote(banknote50);
+        System.out.println(String.format("account, after receive banknote50: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteCells);
+
+        cashpoint.receiveBanknote(banknote100);
+        System.out.println(String.format("account, after receive banknote100: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteCells);
+
+        cashpoint.returnBanknotes(160);
+        System.out.println(String.format("account, after return 160: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteCells);
+    }
+
+    private static void printCellContent(Map<INominal, ? extends IGotCell> cells) {
+        System.out.println("--------------------------------------------");
+        cells.forEach((nominal, cell) -> {
+            System.out.println(String.format("cell nominal: %s, cell size: %s", nominal.getNominalValue(), cell.getSize()));
+        });
+        System.out.println("--------------------------------------------");
+    }
+
+
+    private static void fillCell(Cell cell, IBanknote banknote, int number) {
+        for (int i = 0; i < number; i++) {
+            cell.putBanknote(banknote);
+        }
+    }
+}
