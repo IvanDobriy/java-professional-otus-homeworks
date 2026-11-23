@@ -12,9 +12,9 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BanknoteReturning implements IBanknoteReturning {
-    private final List<Map.Entry<INominal, IGotCell>> cells;
+    private final List<? extends Map.Entry<INominal, ? extends IGotCell>> cells;
 
-    public BanknoteReturning(Map<INominal, IGotCell> cells) {
+    public BanknoteReturning(Map<INominal, ? extends  IGotCell> cells) {
         Objects.requireNonNull(cells);
         this.cells = cells.entrySet()
                 .stream()

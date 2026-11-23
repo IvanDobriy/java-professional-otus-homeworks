@@ -9,9 +9,9 @@ import java.util.Objects;
 
 public class BanknoteReceiving implements IBanknoteReceiving {
 
-    private final Map<INominal, IPutCell> cells;
+    private final Map<INominal, ? extends IPutCell> cells;
 
-    public BanknoteReceiving(Map<INominal, IPutCell> cells) {
+    public BanknoteReceiving(Map<INominal, ? extends IPutCell> cells) {
         Objects.requireNonNull(cells);
         this.cells = cells;
     }

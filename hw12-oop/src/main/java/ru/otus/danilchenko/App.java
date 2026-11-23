@@ -37,39 +37,34 @@ public class App {
         fillCell(cell50, banknote50, 20);
         fillCell(cell100, banknote100, 30);
 
-        final var banknoteReceivingCells = new HashMap<INominal, IPutCell>();
-        banknoteReceivingCells.put(nominal10, cell10);
-        banknoteReceivingCells.put(nominal50, cell50);
-        banknoteReceivingCells.put(nominal100, cell100);
-
-        final var banknoteReturningCells = new HashMap<INominal, IGotCell>();
-        banknoteReturningCells.put(nominal10, cell10);
-        banknoteReturningCells.put(nominal50, cell50);
-        banknoteReturningCells.put(nominal100, cell100);
+        final var banknoteCells = new HashMap<INominal, Cell>();
+        banknoteCells.put(nominal10, cell10);
+        banknoteCells.put(nominal50, cell50);
+        banknoteCells.put(nominal100, cell100);
 
 
         final var userAccount = new CurrentAccount(1, 1000);
 
 
         final var accountStorage = new AccountStorage(Map.of(userAccount.getId(), userAccount));
-        final var banknoteReceiving = new BanknoteReceiving(banknoteReceivingCells);
-        final var banknoteReturning = new BanknoteReturning(banknoteReturningCells);
+        final var banknoteReceiving = new BanknoteReceiving(banknoteCells);
+        final var banknoteReturning = new BanknoteReturning(banknoteCells);
         final var cashpoint = new Cashpoint(banknoteReceiving, banknoteReturning, accountStorage);
         cashpoint.login(1);
         System.out.println(String.format("account, before receive banknote10: %s", userAccount.getAmountOfMoney()));
-        printCellContent(banknoteReturningCells);
+        printCellContent(banknoteCells);
         cashpoint.receiveBanknote(banknote10);
         System.out.println(String.format("account, after receive banknote10: %s", userAccount.getAmountOfMoney()));
-        printCellContent(banknoteReturningCells);
+        printCellContent(banknoteCells);
         cashpoint.receiveBanknote(banknote50);
         System.out.println(String.format("account, after receive banknote50: %s", userAccount.getAmountOfMoney()));
-        printCellContent(banknoteReturningCells);
+        printCellContent(banknoteCells);
         cashpoint.receiveBanknote(banknote100);
         System.out.println(String.format("account, after receive banknote100: %s", userAccount.getAmountOfMoney()));
-        printCellContent(banknoteReturningCells);
+        printCellContent(banknoteCells);
     }
 
-    private static void printCellContent( Map<INominal, IGotCell> cells) {
+    private static void printCellContent( Map<INominal, ? extends IGotCell> cells) {
         System.out.println("--------------------------------------------");
         cells.forEach( (nominal, cell) -> {
             System.out.println(String.format("cell nominal: %s, cell size: %s", nominal.getNominalValue(), cell.getSize()));

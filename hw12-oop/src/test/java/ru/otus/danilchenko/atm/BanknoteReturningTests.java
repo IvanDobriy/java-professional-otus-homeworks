@@ -23,9 +23,6 @@ public class BanknoteReturningTests {
     @Mock
     private Cell cell100;
 
-    @Mock
-    private CurrentAccount currentAccount;
-
 
     @Test
     void positive_test() {
@@ -36,8 +33,6 @@ public class BanknoteReturningTests {
                 Map.of(banknote1.getNominal(), cell10, banknote2.getNominal(), cell100)
         );
 
-        Mockito.when(currentAccount.getAmountOfMoney()).thenReturn(110);
-        Mockito.doNothing().when(currentAccount).removeAmountOfMoney(110);
 
         Mockito.when(cell10.getBanknote()).thenReturn(banknote1);
         Mockito.when(cell10.getSize()).thenReturn(1, 0);
