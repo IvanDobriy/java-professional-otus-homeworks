@@ -25,7 +25,7 @@ public class Cashpoint implements IBanknoteReceiving, IBanknoteReturning, ILogin
     @Override
     public void receiveBanknote(IBanknote banknote) {
         Objects.requireNonNull(account, "to receive banknote first need login");
-        account.addAmountOfMoney(banknote.getNominal().getNominalValue());
+        account.addAmountOfMoney(BanknoteUtils.getNominalValue(banknote.getNominal()));
         banknoteReceiving.receiveBanknote(banknote);
     }
 
