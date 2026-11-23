@@ -11,11 +11,9 @@ import ru.otus.danilchenko.atm.banknote.INominal;
 import ru.otus.danilchenko.atm.banknote.Nominal;
 import ru.otus.danilchenko.atm.cell.Cell;
 import ru.otus.danilchenko.atm.cell.IGotCell;
-import ru.otus.danilchenko.atm.cell.IPutCell;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class App {
@@ -51,22 +49,30 @@ public class App {
         final var banknoteReturning = new BanknoteReturning(banknoteCells);
         final var cashpoint = new Cashpoint(banknoteReceiving, banknoteReturning, accountStorage);
         cashpoint.login(1);
+
         System.out.println(String.format("account, before receive banknote10: %s", userAccount.getAmountOfMoney()));
         printCellContent(banknoteCells);
+
         cashpoint.receiveBanknote(banknote10);
         System.out.println(String.format("account, after receive banknote10: %s", userAccount.getAmountOfMoney()));
         printCellContent(banknoteCells);
+
         cashpoint.receiveBanknote(banknote50);
         System.out.println(String.format("account, after receive banknote50: %s", userAccount.getAmountOfMoney()));
         printCellContent(banknoteCells);
+
         cashpoint.receiveBanknote(banknote100);
         System.out.println(String.format("account, after receive banknote100: %s", userAccount.getAmountOfMoney()));
         printCellContent(banknoteCells);
+
+        cashpoint.returnBanknotes(160);
+        System.out.println(String.format("account, after return 160: %s", userAccount.getAmountOfMoney()));
+        printCellContent(banknoteCells);
     }
 
-    private static void printCellContent( Map<INominal, ? extends IGotCell> cells) {
+    private static void printCellContent(Map<INominal, ? extends IGotCell> cells) {
         System.out.println("--------------------------------------------");
-        cells.forEach( (nominal, cell) -> {
+        cells.forEach((nominal, cell) -> {
             System.out.println(String.format("cell nominal: %s, cell size: %s", nominal.getNominalValue(), cell.getSize()));
         });
         System.out.println("--------------------------------------------");
