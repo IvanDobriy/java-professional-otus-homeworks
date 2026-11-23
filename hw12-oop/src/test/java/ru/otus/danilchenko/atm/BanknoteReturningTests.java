@@ -33,7 +33,7 @@ public class BanknoteReturningTests {
         final var banknote2 = new Banknote(new Nominal(100));
 
         final var banknoteReturning = new BanknoteReturning(
-                Map.of(banknote1.getNominal(), cell10, banknote2.getNominal(), cell100), currentAccount
+                Map.of(banknote1.getNominal(), cell10, banknote2.getNominal(), cell100)
         );
 
         Mockito.when(currentAccount.getAmountOfMoney()).thenReturn(110);
@@ -44,7 +44,7 @@ public class BanknoteReturningTests {
         Mockito.when(cell100.getBanknote()).thenReturn(banknote2);
         Mockito.when(cell100.getSize()).thenReturn(1, 0);
 
-        
+
         final var result  = banknoteReturning.returnBanknotes(110);
         Assertions.assertEquals(2, result.length);
         Assertions.assertArrayEquals(new IBanknote[]{banknote2, banknote1}, result);

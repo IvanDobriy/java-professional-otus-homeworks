@@ -24,9 +24,6 @@ public class BanknoteReceivingTests {
     @Mock
     private Cell cell100;
 
-    @Mock
-    private CurrentAccount currentAccount;
-
     private BanknoteReceiving banknoteReceiving;
 
     @Test
@@ -36,11 +33,9 @@ public class BanknoteReceivingTests {
         Mockito.doNothing().when(cell10).putBanknote(banknote1);
         Mockito.doNothing().when(cell100).putBanknote(banknote2);
 
-        Mockito.doNothing().when(currentAccount).addAmountOfMoney(10);
-
         banknoteReceiving = new BanknoteReceiving(
                 Map.of(banknote1.getNominal(), cell10,
-                        banknote2.getNominal(), cell100), currentAccount);
+                        banknote2.getNominal(), cell100));
 
 
         banknoteReceiving.receiveBanknote(banknote1);
@@ -48,9 +43,6 @@ public class BanknoteReceivingTests {
 
         Mockito.verify(cell10, Mockito.times(1)).putBanknote(banknote1);
         Mockito.verify(cell10, Mockito.times(0)).putBanknote(banknote2);
-
-        Mockito.verify(currentAccount, Mockito.times(1)).addAmountOfMoney(10);
-        Mockito.verify(currentAccount, Mockito.times(1)).addAmountOfMoney(100);
 
         Mockito.verify(cell100, Mockito.times(0)).putBanknote(banknote1);
         Mockito.verify(cell100, Mockito.times(1)).putBanknote(banknote2);

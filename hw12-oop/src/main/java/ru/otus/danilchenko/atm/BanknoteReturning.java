@@ -13,13 +13,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class BanknoteReturning implements IBanknoteReturning {
     private final List<Map.Entry<INominal, IGotCell>> cells;
-    private final IAccount account;
 
-    public BanknoteReturning(Map<INominal, IGotCell> cells, IAccount account) {
+    public BanknoteReturning(Map<INominal, IGotCell> cells) {
         Objects.requireNonNull(cells);
-        Objects.requireNonNull(account);
-        this.account = account;
-
         this.cells = cells.entrySet()
                 .stream()
                 .sorted(
@@ -34,9 +30,6 @@ public class BanknoteReturning implements IBanknoteReturning {
     public IBanknote[] returnBanknotes(int returnedSum) {
         List<IBanknote> banknotes = new ArrayList<>();
         final AtomicInteger rest = new AtomicInteger(returnedSum);
-        if(account.getAmountOfMoney() < returnedSum){
-            return new IBanknote[0];
-        }
         cells.forEach(el -> {
             INominal nominal = el.getKey();
             IGotCell cell = el.getValue();
@@ -46,7 +39,6 @@ public class BanknoteReturning implements IBanknoteReturning {
                 rest.set(rest.get() % nominal.getNominalValue());
             }
         });
-        account.removeAmountOfMoney(returnedSum - rest.get());
         return banknotes.toArray(IBanknote[]::new);
     }
 }
