@@ -14,8 +14,11 @@ public class Cashpoint implements IBanknoteReceiving, IBanknoteReturning, ILogin
     public Cashpoint(IBanknoteReceiving banknoteReceiving, IBanknoteReturning banknoteReturning, IAccountStorage accountStorage) {
         Objects.requireNonNull(banknoteReceiving);
         Objects.requireNonNull(banknoteReturning);
+        Objects.requireNonNull(accountStorage);
+        
         this.banknoteReceiving = banknoteReceiving;
         this.banknoteReturning = banknoteReturning;
+        this.accountStorage = accountStorage;
         account = null;
     }
 
